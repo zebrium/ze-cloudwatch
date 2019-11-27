@@ -6,7 +6,7 @@ const zlib = require('zlib');
 
 const MAX_REQUEST_TIMEOUT_MS = 20000;
 const FREE_SOCKET_TIMEOUT_MS = 200000;
-const ZAPI_URL = process.env.ZE_LOG_COLLECTOR_URL || 'https://35.184.142.183';
+const ZAPI_URL = process.env.ZE_LOG_COLLECTOR_URL;
 const MAX_REQUEST_RETRIES = parseInt(process.env.ZE_MAX_REQUEST_RETRIES) || 8;
 const REQUEST_RETRY_INTERVAL_MS = parseInt(process.env.ZE_REQUEST_RETRY_INTERVAL) || 200;
 const DEFAULT_HTTP_ERRORS = [
