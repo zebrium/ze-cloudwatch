@@ -1,0 +1,30 @@
+{
+  "name": "zebrium-cloudwatch",
+  "version": "1.15.0",
+  "description": "Zebrium lambda functions for streaming from AWS CloudWatch to Zebrium ingest server",
+  "main": "index.js",
+  "scripts": {
+    "lint": "./node_modules/.bin/eslint -c .eslintrc *.js"
+  },
+  "dependencies": {
+    "agentkeepalive": "^4.0.2",
+    "async": "^2.6.2",
+    "request": "^2.88.0"
+  },
+  "keywords": [
+    "lambda",
+    "logdna",
+    "aws",
+    "cloudwatch"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/zebrium/ze-cloudwatch.git"
+  },
+  "author": "Zebrium",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/zebrium/ze-cloudwatch/issues"
+  },
+  "homepage": "https://github.com/zebrium/ze-cloudwatch"
+}
