@@ -22,9 +22,9 @@
   5. For Execution role, choose an existing role with Lambda excution permission
   6. Click on Designer and click on "Add a trigger". Type "CloudWatch Logs" and choose your log group.
   7. Set the following environment variables:
-   * ZE_DEPLOYMENT_NAME: Deployment name (Required)
-   * ZE_HOST: Alternative Host Name (Optional)
-   * ZE_LOG_COLLECTOR_URL: ZAPI URL
-   * ZE_LOG_COLLECTOR_TOKEN: Auth token
+   * `ZE_DEPLOYMENT_NAME`: Deployment name (Required)
+   * `ZE_HOST`: Alternative Host Name (Optional)
+   * `ZE_LOG_COLLECTOR_URL`: ZAPI URL
+   * `ZE_LOG_COLLECTOR_TOKEN`: Auth token
    
 Click on Save button to save your new Lambda function. New logs should appear on Zebrium web portal in a coulple of minutes.
