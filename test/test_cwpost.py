@@ -1,0 +1,105 @@
+#!/usr/bin/python3
+
+# Script for testing zapi cloudwatch REST API
+#
+# Usage:
+#     test_cwpost.py -u <ZE_API_URL> -t <ZE_API_AUTH_TOKEN>
+#
+
+import requests
+import json
+import pprint
+import logging
+import sys
+import urllib3
+import urllib
+import argparse
+from time import sleep
+from io import StringIO
+
+pp = pprint.PrettyPrinter(indent=4)
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
+def tzstr():
+    import calendar
+    import time
+    tzoffset = (calendar.timegm(time.gmtime()) - calendar.timegm(time.localtime())) / 60
+    if tzoffset > 0:
+        (tzsign, tzhours, tzmins) = ("-", tzoffset / 60, tzoffset % 60)
+    else:
+        (tzsign, tzhours, tzmins) = ("+", (-tzoffset) / 60, (-tzoffset) % 60)
+    return "%s%02d:%02d" % (tzsign, tzhours, tzmins)
+
+logger_stream = StringIO()
+logging.basicConfig(stream=logger_stream,
+                    level=logging.INFO,
+                    format='%(asctime)s.%(msecs)03d' + tzstr() + ' %(process)d %(levelname)s: %(message)s',
+                    datefmt="%Y-%m-%dT%H:%M:%S")
+
+usage = """
+%(prog)s [options]
+-u <url>
+-t <token>
+"""
+
+def err_exit(msg):
+    sys.stderr.write(msg + "\n")
+    exit(1)
+
+def post_data(url, token):
+    # ids meta data identify a log source
+    ids = {}
+    ids['host'] = 'test_host1'
+    ids['ze_deployment_name'] = 'test_deployment1'
+    ids['app'] = 'test_app'
+    # Add additional user specific ids
+    ids['log_group'] = 'my_log_group1'
+    ids['log_stream'] = 'my_log_stream1'
+
+    meta_data ={}
+    meta_data['stream'] = 'native'
+    meta_data['logbasename'] = 'app-logfile-name'
+    meta_data['container_log'] = False
+    meta_data['ids'] = ids
+    meta_data['cfgs'] = {}
+    meta_data['tags'] = {}
+
+    # generate some test messages
+    for i in range(1500):
+        logging.info("test msg #%d" % i)
+        sleep(0.001)
+    msgs = logger_stream.getvalue().split('\n')
+    # data payload is an array of the log messages with the following format:
+    #    { 'timestamp': <timestamp>, 'message': <log_msg> }
+    #
+    # Since server reads data in memory first, please make sure total payload
+    # not exceeds a few MB.
+    #
+    # Please note 'timestamp' key must exist even it is not used.
+    log_data = []
+    for line in msgs:
+        # 'timestamp' is not used unless meta_data['container_log'] is set to True
+        log_data.append({ 'timestamp': 0, 'message': line })
+
+    data = { 'meta_data': meta_data, 'log_data': log_data }
+
+    headers = {
+                'content-type': 'application/json',
+                'Authorization': 'Token %s' % token
+    }
+
+    sess = requests.Session()
+    resp = sess.post(url + '/api/v2/cwpost', verify=True, json=data, headers=headers)
+    if resp.status_code != 200 and resp.status_code != 201:
+        pp.pprint(resp.text)
+        err_exit('Failed to log in: server returned error status %d' % resp.status_code)
+
+def main():
+    parser = argparse.ArgumentParser(usage=usage)
+    parser.add_argument("-u", "--url", help="Zebrium cloudwatch post API URL", default="", required=True)
+    parser.add_argument("-t", "--token", help="Zebrium API authentication token", default="", required=True)
+    args = parser.parse_args()
+    post_data(args.url, args.token)
+
+if __name__ == '__main__':
+    main()
