@@ -52,17 +52,23 @@ def post_data(url, token):
     ids['host'] = 'test_host1'
     ids['ze_deployment_name'] = 'test_deployment1'
     ids['app'] = 'test_app'
-    # Add additional user specific ids
+    # Add additional user specific ids if needed
     ids['log_group'] = 'my_log_group1'
     ids['log_stream'] = 'my_log_stream1'
 
-    meta_data ={}
-    meta_data['stream'] = 'native'
-    meta_data['logbasename'] = 'app-logfile-name'
-    meta_data['container_log'] = False
-    meta_data['ids'] = ids
-    meta_data['cfgs'] = {}
-    meta_data['tags'] = {}
+    # These two meta data types are NOT required but can be used for adding arbitrary configuration meta data or name-value tags
+    # These are not used in any special way by the UI or incident detection. 
+    cfgs = {}
+    tags = {}
+
+    # This is a special set of meta data elements that are required by Zebrium
+    meta_data = {}
+    meta_data['stream'] = 'native' # Always use 'native'
+    meta_data['logbasename'] = 'app-logfile-name' # You must set this. would typically be basename of application log or syslog, etc.
+    meta_data['container_log'] = False  # These logs are NOT from a container
+    meta_data['ids']  = ids   # From Settings above
+    meta_data['cfgs'] = cfgs  # From Settings above
+    meta_data['tags'] = tags  # From Settings above
 
     # generate some test messages
     for i in range(1500):
