@@ -46,7 +46,7 @@ def err_exit(msg):
     sys.stderr.write(msg + "\n")
     exit(1)
 
-def post_data(url, token):
+def post_data(url, token, insecure):
     # ids meta data identify a log source
     ids = {}
     ids['host'] = 'test_host1'
@@ -57,7 +57,7 @@ def post_data(url, token):
     ids['log_stream'] = 'my_log_stream1'
 
     # These two meta data types are NOT required but can be used for adding arbitrary configuration meta data or name-value tags
-    # These are not used in any special way by the UI or incident detection. 
+    # These are not used in any special way by the UI or incident detection.
     cfgs = {}
     tags = {}
 
@@ -85,8 +85,8 @@ def post_data(url, token):
     log_data = []
     for line in msgs:
         # 'timestamp' is not used unless meta_data['container_log'] is set to True
-        log_data.append({ 'timestamp': 0, 'message': line })
-
+        if len(line) > 0:
+            log_data.append({ 'timestamp': 0, 'message': line })
     data = { 'meta_data': meta_data, 'log_data': log_data }
 
     headers = {
@@ -95,7 +95,7 @@ def post_data(url, token):
     }
 
     sess = requests.Session()
-    resp = sess.post(url + '/api/v2/cwpost', verify=True, json=data, headers=headers)
+    resp = sess.post(url + '/api/v2/cwpost', verify=not insecure, json=data, headers=headers)
     if resp.status_code != 200 and resp.status_code != 201:
         pp.pprint(resp.text)
         err_exit('Failed to log in: server returned error status %d' % resp.status_code)
@@ -103,9 +103,10 @@ def post_data(url, token):
 def main():
     parser = argparse.ArgumentParser(usage=usage)
     parser.add_argument("-u", "--url", help="Zebrium cloudwatch post API URL", default="", required=True)
+    parser.add_argument("-k", "--insecure", help="Disable SSL certificate check", action='store_true', required=False)
     parser.add_argument("-t", "--token", help="Zebrium API authentication token", default="", required=True)
     args = parser.parse_args()
-    post_data(args.url, args.token)
+    post_data(args.url, args.token, args.insecure)
 
 if __name__ == '__main__':
     main()
