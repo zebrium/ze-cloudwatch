@@ -14,7 +14,7 @@ import sys
 import urllib3
 import urllib
 import argparse
-from time import sleep
+import time
 from io import StringIO
 
 pp = pprint.PrettyPrinter(indent=4)
@@ -73,7 +73,7 @@ def post_data(url, token, insecure):
     # generate some test messages
     for i in range(1500):
         logging.info("test msg #%d" % i)
-        sleep(0.001)
+        time.sleep(0.001)
     msgs = logger_stream.getvalue().split('\n')
     # data payload is an array of the log messages with the following format:
     #    { 'timestamp': <timestamp>, 'message': <log_msg> }
@@ -84,9 +84,9 @@ def post_data(url, token, insecure):
     # Please note 'timestamp' key must exist even it is not used.
     log_data = []
     for line in msgs:
-        # 'timestamp' is not used unless meta_data['container_log'] is set to True
         if len(line) > 0:
-            log_data.append({ 'timestamp': 0, 'message': line })
+            epoch_ms = int(time.time() * 1000)
+            log_data.append({ 'timestamp': epoch_ms, 'message': line })
     data = { 'meta_data': meta_data, 'log_data': log_data }
 
     headers = {
