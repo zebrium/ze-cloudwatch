@@ -6,6 +6,7 @@ const zlib = require('zlib');
 
 const MAX_REQUEST_TIMEOUT_MS = 20000;
 const FREE_SOCKET_TIMEOUT_MS = 200000;
+const DEFAULT_DEPLOYMENT_NAME = "default";
 const ZAPI_URL = process.env.ZE_LOG_COLLECTOR_URL;
 const MAX_REQUEST_RETRIES = parseInt(process.env.ZE_MAX_REQUEST_RETRIES) || 8;
 const REQUEST_RETRY_INTERVAL_MS = parseInt(process.env.ZE_REQUEST_RETRY_INTERVAL) || 200;
@@ -23,13 +24,15 @@ const INTERNAL_SERVER_ERROR = 500;
 const getConfig = () => {
     const pkg = require('./package.json');
     let config = {
-        UserAgent: `${pkg.name}/${pkg.version}`
+        Version: `${pkg.version}` + "-cloudwatch"
     };
 
     if (process.env.ZE_LOG_COLLECTOR_TOKEN) {
         config.token = process.env.ZE_LOG_COLLECTOR_TOKEN;
     }
-    if (process.env.ZE_DEPLOYMENT_NAME) {
+    if (!process.env.ZE_DEPLOYMENT_NAME || 0 === process.env.ZE_DEPLOYMENT_NAME.length) {
+        config.ze_deployment_name = DEFAULT_DEPLOYMENT_NAME;
+    } else {
         config.ze_deployment_name = process.env.ZE_DEPLOYMENT_NAME;
     }
     if (process.env.ZE_HOST) {
@@ -74,6 +77,7 @@ const getMetaData = (eventData, config) => {
     meta_data['stream'] = "native";
     meta_data['logbasename'] = eventData.logStream;
     meta_data['container_log'] = false;
+    meta_data['ze_log_collector_vers'] = config.Version;
     meta_data['ids'] = ids;
     meta_data['cfgs'] = {};
     meta_data['tags'] = {};
