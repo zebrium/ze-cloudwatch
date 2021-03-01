@@ -1,6 +1,6 @@
 {
   "name": "zebrium-cloudwatch",
-  "version": "1.15.0",
+  "version": "1.47.0",
   "description": "Zebrium lambda functions for streaming from AWS CloudWatch to Zebrium ingest server",
   "main": "index.js",
   "scripts": {
